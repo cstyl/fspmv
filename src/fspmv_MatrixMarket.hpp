@@ -19,7 +19,7 @@
 #include <string>
 
 namespace fspmv {
-void read_matrix(const SparseMatrix& mtx, const std::string& filename);
+void read_matrix(SparseMatrix& mtx, const std::string& filename);
 }
 
 #endif  // FSPMV_MATRIXMARKET_HPP

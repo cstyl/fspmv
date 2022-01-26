@@ -21,11 +21,10 @@
 
 namespace fspmv {
 
-template <typename ValueType, typename IndexType>
 class CooMatrix {
  public:
-  using index_type       = IndexType;
-  using value_type       = ValueType;
+  using index_type       = index_type;
+  using value_type       = value_type;
   using index_array_type = std::vector<index_type, host_allocator<index_type>>;
   using value_array_type = std::vector<value_type, host_allocator<value_type>>;
 

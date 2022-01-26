@@ -15,6 +15,7 @@
 #include "fspmv_MatrixMarket.hpp"
 #include "fspmv_Exceptions.hpp"
 #include "fspmv_CooMatrix.hpp"
+#include "fspmv_Convert.hpp"
 
 #include <vector>
 #include <string>
@@ -82,9 +83,11 @@ void read_matrix_market_banner(matrix_market_banner& banner, Stream& input) {
                              banner.symmetry + "]");
 }
 
-template <typename ValueType, typename IndexType, typename Stream>
-void read_coordinate_stream(CooMatrix<ValueType, IndexType>& mat, Stream& input,
+template <typename Stream>
+void read_coordinate_stream(CooMatrix& mat, Stream& input,
                             const matrix_market_banner& banner) {
+  using index_type = typename CooMatrix::index_type;
+  using value_type = typename CooMatrix::value_type;
   // read file contents line by line
   std::string line;
 
@@ -100,35 +103,35 @@ void read_coordinate_stream(CooMatrix<ValueType, IndexType>& mat, Stream& input,
   if (tokens.size() != 3)
     throw fspmv::IOException("invalid MatrixMarket coordinate format");
 
-  IndexType num_rows, num_cols, num_entries;
+  index_type num_rows, num_cols, num_entries;
 
   std::istringstream(tokens[0]) >> num_rows;
   std::istringstream(tokens[1]) >> num_cols;
   std::istringstream(tokens[2]) >> num_entries;
 
-  mat(num_rows, num_cols, num_entries);
+  mat.resize(num_rows, num_cols, num_entries);
 
-  IndexType num_entries_read = 0;
+  index_type num_entries_read = 0;
 
   // read file contents
   if (banner.type == "pattern") {
     while (num_entries_read < num_entries && !input.eof()) {
-      input >> mat.row_indices(num_entries_read);
-      input >> mat.column_indices(num_entries_read);
+      input >> mat.row_indices[num_entries_read];
+      input >> mat.column_indices[num_entries_read];
       num_entries_read++;
     }
 
     std::fill(mat.values.data(), mat.values.data() + mat.values.size(),
-              ValueType(1));
+              value_type(1));
   } else if (banner.type == "real" || banner.type == "integer") {
     while (num_entries_read < num_entries && !input.eof()) {
-      ValueType real;
+      value_type real;
 
-      input >> mat.row_indices(num_entries_read);
-      input >> mat.column_indices(num_entries_read);
+      input >> mat.row_indices[num_entries_read];
+      input >> mat.column_indices[num_entries_read];
       input >> real;
 
-      mat.values(num_entries_read) = real;
+      mat.values[num_entries_read] = real;
       num_entries_read++;
     }
   } else if (banner.type == "complex") {
@@ -146,17 +149,17 @@ void read_coordinate_stream(CooMatrix<ValueType, IndexType>& mat, Stream& input,
 
   // check validity of row and column index data
   if (num_entries > 0) {
-    IndexType min_row_index =
+    index_type min_row_index =
         *std::min_element(mat.row_indices.data(),
                           mat.row_indices.data() + mat.row_indices.size());
-    IndexType max_row_index =
+    index_type max_row_index =
         *std::max_element(mat.row_indices.data(),
                           mat.row_indices.data() + mat.row_indices.size());
 
-    IndexType min_col_index = *std::min_element(
+    index_type min_col_index = *std::min_element(
         mat.column_indices.data(),
         mat.column_indices.data() + mat.column_indices.size());
-    IndexType max_col_index = *std::max_element(
+    index_type max_col_index = *std::max_element(
         mat.column_indices.data(),
         mat.column_indices.data() + mat.column_indices.size());
 
@@ -172,37 +175,36 @@ void read_coordinate_stream(CooMatrix<ValueType, IndexType>& mat, Stream& input,
   }
 
   // convert base-1 indices to base-0
-  for (IndexType n = 0; n < num_entries; n++) {
-    mat.row_indices(n) -= 1;
-    mat.column_indices(n) -= 1;
+  for (index_type n = 0; n < num_entries; n++) {
+    mat.row_indices[n] -= 1;
+    mat.column_indices[n] -= 1;
   }
 
   // expand symmetric formats to "general" format
   if (banner.symmetry != "general") {
-    IndexType off_diagonals = 0;
+    index_type off_diagonals = 0;
 
-    for (IndexType n = 0; n < num_entries; n++)
-      if (mat.row_indices(n) != mat.column_indices(n)) off_diagonals++;
+    for (index_type n = 0; n < num_entries; n++)
+      if (mat.row_indices[n] != mat.column_indices[n]) off_diagonals++;
 
-    IndexType general_num_entries = num_entries + off_diagonals;
-    CooMatrix<ValueType, IndexType> general(num_rows, num_cols,
-                                            general_num_entries);
+    index_type general_num_entries = num_entries + off_diagonals;
+    CooMatrix general(num_rows, num_cols, general_num_entries);
 
     if (banner.symmetry == "symmetric") {
-      IndexType nnz = 0;
+      index_type nnz = 0;
 
-      for (IndexType n = 0; n < num_entries; n++) {
+      for (index_type n = 0; n < num_entries; n++) {
         // copy entry over
-        general.row_indices(nnz)    = mat.row_indices(n);
-        general.column_indices(nnz) = mat.column_indices(n);
-        general.values(nnz)         = mat.values(n);
+        general.row_indices[nnz]    = mat.row_indices[n];
+        general.column_indices[nnz] = mat.column_indices[n];
+        general.values[nnz]         = mat.values[n];
         nnz++;
 
         // duplicate off-diagonals
-        if (mat.row_indices(n) != mat.column_indices(n)) {
-          general.row_indices(nnz)    = mat.row_indices(n);
-          general.column_indices(nnz) = mat.column_indices(n);
-          general.values(nnz)         = mat.values(n);
+        if (mat.row_indices[n] != mat.column_indices[n]) {
+          general.row_indices[nnz]    = mat.row_indices[n];
+          general.column_indices[nnz] = mat.column_indices[n];
+          general.values[nnz]         = mat.values[n];
           nnz++;
         }
       }
@@ -234,10 +236,10 @@ void read_matrix_market_stream(SparseMatrix& mtx, Stream& input) {
   read_matrix_market_banner(banner, input);
 
   if (banner.storage == "coordinate") {
-    CooMatrix<value_type, index_type> mat;
-    read_coordinate_stream(mat, input, banner);
+    CooMatrix temp;
+    read_coordinate_stream(temp, input, banner);
     // TODO
-    Morpheus::convert(temp, mtx);
+    fspmv::convert(temp, mtx);
 
   } else  // banner.storage == "array"
   {
@@ -247,7 +249,7 @@ void read_matrix_market_stream(SparseMatrix& mtx, Stream& input) {
 }
 }  // namespace Impl
 
-void read_matrix(const SparseMatrix& mtx, const std::string& filename) {
+void read_matrix(SparseMatrix& mtx, const std::string& filename) {
   std::ifstream file(filename.c_str());
 
   if (!file)
