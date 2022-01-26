@@ -1,0 +1,14 @@
+# -*- Makefile -*-
+
+arch=UNKNOWN
+
+VERSION = 0.1
+
+UNKNOWN:
+	@echo
+	@echo Please specify "'"arch"'" variable, for example:
+	@echo 1. Create file "'"Make.Unix"'" in the "'"setup"'" directory
+	@echo 2. Type: "'"make arch=Unix"'"
+	@echo
+
+.PHONY: UNKNOWN

@@ -1,0 +1,58 @@
+# ----------------------------------------------------------------------
+# - shell --------------------------------------------------------------
+# ----------------------------------------------------------------------
+#
+SHELL        = /bin/sh
+#
+CD           = cd
+CP           = cp
+LN_S         = ln -s -f
+MKDIR        = mkdir -p
+RM           = /bin/rm -f
+TOUCH        = touch
+#
+# ----------------------------------------------------------------------
+# - fspmv Directory Structure / fspmv library ------------------------------
+# ----------------------------------------------------------------------
+#
+TOPdir       = .
+SRCdir       = $(TOPdir)/src
+INCdir       = $(TOPdir)/src
+BINdir       = $(TOPdir)/bin
+#
+# ----------------------------------------------------------------------
+# - fspmv includes / libraries / specifics -------------------------------
+# ----------------------------------------------------------------------
+#
+fspmv_INCLUDES = -I$(INCdir)
+fspmv_LIBS     =
+#
+# - Compile time options -----------------------------------------------
+#
+# -DFSPMV_ALIGNED_ALLOCATOR	        Define to enable aligned allocator to be used in std::vector containers
+#
+# By default FSPMV will:
+#    *) Build with Aligned allocator disabled.
+#
+fspmv_OPTS     = 
+#
+# ----------------------------------------------------------------------
+#
+fspmv_DEFS     = $(fspmv_OPTS) $(fspmv_INCLUDES)
+#
+# ----------------------------------------------------------------------
+# - Compilers / linkers - Optimization flags ---------------------------
+# ----------------------------------------------------------------------
+#
+CXX          = /usr/bin/g++
+CXX          = g++-11
+CXXFLAGS     = $(fspmv_DEFS) -O0 -g -std=c++11 -fsanitize=bounds-strict
+#
+LINKER       = $(CXX)
+LINKFLAGS    = $(CXXFLAGS)
+#
+ARCHIVER     = ar
+ARFLAGS      = r
+RANLIB       = echo
+#
+# ----------------------------------------------------------------------
