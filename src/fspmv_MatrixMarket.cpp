@@ -16,6 +16,7 @@
 #include "fspmv_Exceptions.hpp"
 #include "fspmv_CooMatrix.hpp"
 #include "fspmv_Convert.hpp"
+#include "fspmv_Print.hpp"
 
 #include <vector>
 #include <string>
@@ -150,18 +151,17 @@ void read_coordinate_stream(CooMatrix& mat, Stream& input,
   // check validity of row and column index data
   if (num_entries > 0) {
     index_type min_row_index =
-        *std::min_element(mat.row_indices.data(),
-                          mat.row_indices.data() + mat.row_indices.size());
+        *std::min_element(mat.row_indices.begin(), mat.row_indices.end());
     index_type max_row_index =
-        *std::max_element(mat.row_indices.data(),
-                          mat.row_indices.data() + mat.row_indices.size());
+        *std::max_element(mat.row_indices.begin(), mat.row_indices.end());
 
-    index_type min_col_index = *std::min_element(
-        mat.column_indices.data(),
-        mat.column_indices.data() + mat.column_indices.size());
-    index_type max_col_index = *std::max_element(
-        mat.column_indices.data(),
-        mat.column_indices.data() + mat.column_indices.size());
+    std::cout << "RI:: Min : " << min_row_index << "\tMax : " << max_row_index
+              << std::endl;
+
+    index_type min_col_index =
+        *std::min_element(mat.column_indices.begin(), mat.column_indices.end());
+    index_type max_col_index =
+        *std::max_element(mat.column_indices.begin(), mat.column_indices.end());
 
     if (min_row_index < 1)
       throw fspmv::IOException("found invalid row index (index < 1)");
@@ -184,8 +184,9 @@ void read_coordinate_stream(CooMatrix& mat, Stream& input,
   if (banner.symmetry != "general") {
     index_type off_diagonals = 0;
 
-    for (index_type n = 0; n < num_entries; n++)
+    for (index_type n = 0; n < num_entries; n++) {
       if (mat.row_indices[n] != mat.column_indices[n]) off_diagonals++;
+    }
 
     index_type general_num_entries = num_entries + off_diagonals;
     CooMatrix general(num_rows, num_cols, general_num_entries);
@@ -221,7 +222,7 @@ void read_coordinate_stream(CooMatrix& mat, Stream& input,
 
     // store new full matrix
     num_entries = general_num_entries;
-    mat         = general;
+    mat.copy(general);
   }  // if (banner.symmetry != "general")
   // TODO: sort indices by (row,column)
 }
