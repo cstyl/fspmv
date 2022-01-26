@@ -32,6 +32,13 @@ class Vector {
   // Construct with a specific length
   inline Vector(const index_type len, const value_type value)
       : length(len), values(len, value) {}
+
+  inline void resize(const index_type len) {
+    values.resize(len);
+    length = len;
+  }
+
+  inline void assign(const value_type value) { values.assign(length, value); }
 };
 
 }  // namespace fspmv
