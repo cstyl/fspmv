@@ -17,6 +17,8 @@
 namespace fspmv {
 
 void spmv(const SparseMatrix& A, const Vector& x, Vector& y) {
+  using index_type = typename SparseMatrix::index_type;
+
   for (index_type i = 0; i < A.nrows; i++) {
     for (index_type jj = A.row_offsets[i]; jj < A.row_offsets[i + 1]; jj++) {
       y.values[i] = A.values[jj] * x.values[A.column_indices[jj]];

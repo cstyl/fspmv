@@ -18,13 +18,13 @@
 #include <memory>
 #include <vector>
 
-typedef int index_type;
-typedef float value_type;
+typedef int fspmv_index_type;
+typedef float fspmv_value_type;
 
 template <typename T>
 using host_allocator = std::allocator<T>;
 
 template <typename T>
-using array_type = std::vector<T, host_allocator<T>>;
+using array_type = std::vector<T, host_allocator<T> >;
 
 #endif  // FSPMV_CONFIG_HPP
