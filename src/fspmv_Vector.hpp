@@ -21,6 +21,8 @@
 namespace fspmv {
 class Vector {
  public:
+  using value_type       = fspmv_value_type;
+  using index_type       = std::size_t;
   using value_array_type = std::vector<value_type, host_allocator<value_type>>;
 
   index_type length;

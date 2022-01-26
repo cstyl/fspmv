@@ -18,13 +18,14 @@
 #include "fspmv_Config.hpp"
 #include <cstddef>
 #include <vector>
+#include <iostream>
 
 namespace fspmv {
 
 class CooMatrix {
  public:
-  using index_type       = index_type;
-  using value_type       = value_type;
+  using index_type       = fspmv_index_type;
+  using value_type       = fspmv_value_type;
   using index_array_type = std::vector<index_type, host_allocator<index_type>>;
   using value_array_type = std::vector<value_type, host_allocator<value_type>>;
 
@@ -56,19 +57,27 @@ class CooMatrix {
       : nrows(num_rows),
         ncols(num_cols),
         nnnz(num_entries),
-        row_indices(num_rows + 1),
+        row_indices(num_entries),
         column_indices(num_entries),
         values(num_entries) {}
 
   inline void resize(index_type num_rows, index_type num_cols,
-                     index_type num_entries) {
+                     size_t num_entries) {
     nrows = num_rows;
     ncols = num_cols;
     nnnz  = num_entries;
 
-    row_indices.resize(num_rows + 1);
+    row_indices.resize(num_entries);
     column_indices.resize(num_entries);
     values.resize(num_entries);
+  }
+
+  inline void copy(CooMatrix& matrix) {
+    std::copy(matrix.row_indices.begin(), matrix.row_indices.end(),
+              row_indices.begin());
+    std::copy(matrix.column_indices.begin(), matrix.column_indices.end(),
+              column_indices.begin());
+    std::copy(matrix.values.begin(), matrix.values.end(), values.begin());
   }
 };
 
