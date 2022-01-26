@@ -16,6 +16,7 @@
 #include "fspmv_Vector.hpp"
 #include "fspmv_ComputeSPMV.hpp"
 #include "fspmv_MatrixMarket.hpp"
+#include "fspmv_Print.hpp"
 
 #include <iostream>
 
@@ -38,9 +39,11 @@ int main(int argc, char** argv) {
   x.assign(2.0);
 
   y.resize(A.nrows);
-  y.resize(0.0);
+  y.assign(0.0);
 
   fspmv::spmv(A, x, y);
+
+  fspmv::print(y, std::cout);
 
   return 0;
 }
