@@ -23,7 +23,7 @@ void convert(const CooMatrix& src, SparseMatrix& dst) {
   dst.resize(src.nrows, src.ncols, src.nnnz);
 
   // compute number of non-zero entries per row of coo src
-  for (index_type n = 0; n < src.nnnz; n++) {
+  for (std::size_t n = 0; n < src.nnnz; n++) {
     dst.row_offsets[src.row_indices[n]]++;
   }
 
@@ -36,7 +36,7 @@ void convert(const CooMatrix& src, SparseMatrix& dst) {
   dst.row_offsets[src.nrows] = src.nnnz;
 
   // write coo column indices and values into csr
-  for (index_type n = 0; n < src.nnnz; n++) {
+  for (std::size_t n = 0; n < src.nnnz; n++) {
     index_type row  = src.row_indices[n];
     index_type dest = dst.row_offsets[row];
 

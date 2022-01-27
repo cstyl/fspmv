@@ -155,9 +155,6 @@ void read_coordinate_stream(CooMatrix& mat, Stream& input,
     index_type max_row_index =
         *std::max_element(mat.row_indices.begin(), mat.row_indices.end());
 
-    std::cout << "RI:: Min : " << min_row_index << "\tMax : " << max_row_index
-              << std::endl;
-
     index_type min_col_index =
         *std::min_element(mat.column_indices.begin(), mat.column_indices.end());
     index_type max_col_index =
@@ -229,8 +226,6 @@ void read_coordinate_stream(CooMatrix& mat, Stream& input,
 
 template <typename Stream>
 void read_matrix_market_stream(SparseMatrix& mtx, Stream& input) {
-  using index_type = typename SparseMatrix::index_type;
-  using value_type = typename SparseMatrix::value_type;
 
   // read banner
   matrix_market_banner banner;
