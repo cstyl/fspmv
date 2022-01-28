@@ -40,7 +40,18 @@ class Vector {
     length = len;
   }
 
-  inline void assign(const value_type value) { values.assign(length, value); }
+  inline void assign(const index_type len, const value_type value) {
+    resize(len);
+    values.assign(len, value); 
+  }
+
+  inline void random(const index_type len){
+    resize(len);
+
+    for(index_type i = 0; i < length; i++){
+      values[i] = -1 +std::rand() % 2;
+    }
+  }
 };
 
 }  // namespace fspmv

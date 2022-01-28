@@ -34,12 +34,9 @@ int main(int argc, char** argv) {
   fspmv::Vector x, y;
 
   fspmv::read_matrix(A, filename);
-
-  x.resize(A.ncols);
-  x.assign(2.0);
-
-  y.resize(A.nrows);
-  y.assign(0.0);
+  
+  x.random(A.ncols);
+  y.assign(A.nrows, 0.0);
 
   fspmv::spmv(A, x, y);
 
@@ -47,3 +44,4 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
