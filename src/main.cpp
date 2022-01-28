@@ -16,30 +16,30 @@
 #include "fspmv_Vector.hpp"
 #include "fspmv_ComputeSPMV.hpp"
 #include "fspmv_MatrixMarket.hpp"
+#include "fspmv_Config.hpp"
 
 #include <iostream>
+#include <math.h>  // fabs
 
 #if defined(FSPMV_ENABLE_XILINX)
-#include "fspmv_ComputeSPMV_FPGA.hpp"
+#include "fpga/fspmv_ComputeSPMV_FPGA.hpp"
 
-static void verify(const Vector&, const Vector&);
+static void verify(const fspmv::Vector&, const fspmv::Vector&);
 const int NARGS = 2;
 #else
 const int NARGS = 1;
 #endif
 
-static void execute_on_host(const SparseMatrix&, const Vector&, Vector&);
-
 int main(int argc, char** argv) {
   if (argc != NARGS + 1) {
-    std::cout << "fSpmv::main.cpp requires " << NARGS  << "input " << 
-                 "argument(s) to be given at runtime (filename). " << 
-                 "Only received " << argc - 1 << "!" << std::endl;
+    std::cout << "fSpmv::main.cpp requires " << NARGS << "input "
+              << "argument(s) to be given at runtime (filename). "
+              << "Only received " << argc - 1 << "!" << std::endl;
     exit(-1);
   }
-  
+
 #if defined(FSPMV_ENABLE_XILINX)
-  char *binary_filename = argv[1];
+  char* binary_filename = argv[1];
 #endif
   std::string filename = argv[NARGS];
 
@@ -47,32 +47,34 @@ int main(int argc, char** argv) {
   fspmv::Vector x, y;
 
   fspmv::read_matrix(A, filename);
-  
+
   x.random(A.ncols);
   y.assign(A.nrows, 0.0);
 
-  fspmv::spmv(A, x, y);
+  fspmv::spmv(A, x, y);  // execute on host
 
-#if defined(FSPMV_ENABLE_XILINX)  
+#if defined(FSPMV_ENABLE_XILINX)
   fspmv::Vector yres(A.nrows, 0.0);
 
-  fspmv::spmv_fpga(A, x, yres); // execute on device
+  fspmv::spmv_fpga(A, x, yres);  // execute on device
   verify(y, yres);
 #endif
 
   return 0;
 }
 
-static void verify(const Vector& v1, const Vector& v2){
-  int error = 0;
-  fspmv_index_type EPSILON = sizeof(fspmv_value_type) == 1e-6 ? : 1e-12;
-  for(size_t i = 0; i < v1.length; i++) {
-    if(fabs(a - b) > EPSILON) error++;
+#if defined(FSPMV_ENABLE_XILINX)
+static void verify(const fspmv::Vector& v1, const fspmv::Vector& v2) {
+  int error                = 0;
+  fspmv_value_type EPSILON = ((sizeof(fspmv_value_type) == 4) ? 1e-6 : 1e-12);
+  for (size_t i = 0; i < v1.length; i++) {
+    if (fabs(v1.values[i] - v2.values[i]) > EPSILON) error++;
   }
 
-  if(0 == error){
+  if (0 == error) {
     std::cout << "Vectors match. Result is VALID." << std::endl;
-  }else{
+  } else {
     std::cout << "Vectors do not match. Resut is INVALID." << std::endl;
   }
 }
+#endif

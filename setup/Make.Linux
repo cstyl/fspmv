@@ -35,7 +35,7 @@ DEFS     = $(OPTS) $(INCLUDES)
 # - Compilers / linkers - Optimization flags ---------------------------
 # ----------------------------------------------------------------------
 #
-CXX          = /usr/bin/g++
+CXX          = g++-11
 CXXFLAGS     = $(DEFS) -fomit-frame-pointer -O3 -funroll-loops -W -Wall -pedantic -std=c++11
 #
 LINKER       = $(CXX)

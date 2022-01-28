@@ -17,6 +17,7 @@
 
 #include "fspmv_Config.hpp"
 #include <vector>
+#include <cstdlib>  //std::rand
 
 namespace fspmv {
 class Vector {
@@ -42,14 +43,14 @@ class Vector {
 
   inline void assign(const index_type len, const value_type value) {
     resize(len);
-    values.assign(len, value); 
+    values.assign(len, value);
   }
 
-  inline void random(const index_type len){
+  inline void random(const index_type len) {
     resize(len);
 
-    for(index_type i = 0; i < length; i++){
-      values[i] = -1 +std::rand() % 2;
+    for (index_type i = 0; i < length; i++) {
+      values[i] = -1 + std::rand() % 2;
     }
   }
 };
@@ -57,4 +58,3 @@ class Vector {
 }  // namespace fspmv
 
 #endif  // FSPMV_VECTOR_HPP
-
