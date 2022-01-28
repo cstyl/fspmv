@@ -16,19 +16,32 @@
 #include "fspmv_Vector.hpp"
 #include "fspmv_ComputeSPMV.hpp"
 #include "fspmv_MatrixMarket.hpp"
-#include "fspmv_Print.hpp"
 
 #include <iostream>
 
+#if defined(FSPMV_ENABLE_XILINX)
+#include "fspmv_ComputeSPMV_FPGA.hpp"
+
+static void verify(const Vector&, const Vector&);
+const int NARGS = 2;
+#else
+const int NARGS = 1;
+#endif
+
+static void execute_on_host(const SparseMatrix&, const Vector&, Vector&);
+
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cout << "fSpmv::main.cpp requires 1 input argument to be given "
-                 "at runtime (filename). Only received "
-              << argc - 1 << "!" << std::endl;
+  if (argc != NARGS + 1) {
+    std::cout << "fSpmv::main.cpp requires " << NARGS  << "input " << 
+                 "argument(s) to be given at runtime (filename). " << 
+                 "Only received " << argc - 1 << "!" << std::endl;
     exit(-1);
   }
-
-  std::string filename = argv[1];
+  
+#if defined(FSPMV_ENABLE_XILINX)
+  char *binary_filename = argv[1];
+#endif
+  std::string filename = argv[NARGS];
 
   fspmv::SparseMatrix A;
   fspmv::Vector x, y;
@@ -40,8 +53,26 @@ int main(int argc, char** argv) {
 
   fspmv::spmv(A, x, y);
 
-  fspmv::print(y, std::cout);
+#if defined(FSPMV_ENABLE_XILINX)  
+  fspmv::Vector yres(A.nrows, 0.0);
+
+  fspmv::spmv_fpga(A, x, yres); // execute on device
+  verify(y, yres);
+#endif
 
   return 0;
 }
 
+static void verify(const Vector& v1, const Vector& v2){
+  int error = 0;
+  fspmv_index_type EPSILON = sizeof(fspmv_value_type) == 1e-6 ? : 1e-12;
+  for(size_t i = 0; i < v1.length; i++) {
+    if(fabs(a - b) > EPSILON) error++;
+  }
+
+  if(0 == error){
+    std::cout << "Vectors match. Result is VALID." << std::endl;
+  }else{
+    std::cout << "Vectors do not match. Resut is INVALID." << std::endl;
+  }
+}

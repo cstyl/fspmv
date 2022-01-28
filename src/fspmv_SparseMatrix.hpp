@@ -76,3 +76,4 @@ class SparseMatrix {
 }  // namespace fspmv
 
 #endif  // FSPMV_SPARSEMATRIX_HPP
+

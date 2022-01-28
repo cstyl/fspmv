@@ -57,3 +57,4 @@ class Vector {
 }  // namespace fspmv
 
 #endif  // FSPMV_VECTOR_HPP
+

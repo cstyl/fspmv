@@ -15,16 +15,32 @@
 #ifndef FSPMV_CONFIG_HPP
 #define FSPMV_CONFIG_HPP
 
-#include <memory>
 #include <vector>
 
-typedef int fspmv_index_type;
+#if defined(FSPMV_WITH_XILINX)
+#define FSPMV_ENABLE_XILINX
+#endif
+
+#if defined(FSPMV_ENABLE_XILINX)
+// This file is required for OpenCL C++ wrapper APIs
+#include "xcl2.hpp"
+#else
+#include <memory>
+#endif
+
+typedef int   fspmv_index_type;
 typedef float fspmv_value_type;
 
+#if defined(FSPMV_ENABLE_XILINX)
 template <typename T>
+using host_allocator = aligned_allocator<T>;
+#else
+template<typename T>
 using host_allocator = std::allocator<T>;
+#endif
 
-template <typename T>
-using array_type = std::vector<T, host_allocator<T> >;
+template<typename T>
+using array_type = std::vector<T, host_allocator<T>>;
 
 #endif  // FSPMV_CONFIG_HPP
+

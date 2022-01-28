@@ -83,3 +83,4 @@ class CooMatrix {
 
 }  // namespace fspmv
 #endif  // FSPMV_COOMATRIX_HPP
+
