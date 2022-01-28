@@ -16,12 +16,12 @@ bin/xfspmv /Users/cstyl/Desktop/code/fpga-spmv/data/bcsstk13/bcsstk13.mtx
 - [x] Run main
 - [x] Build with Make
 - [ ] Setup Code for FPGA
-  - [ ] Write OCL Setup Code
+  - [x] Write OCL Setup Code
     - [ ] Update Make to build with OCL
   - [ ] Write FPGA Host SpMV
   - [ ] Write SpMV Kernel
     - [ ] Update Make to build with Xilinx
-  - [ ] Write data movements
-  - [ ] Check results against Serial
+  - [x] Write data movements
+  - [x] Check results against Serial
 - [ ] Add timers
 
