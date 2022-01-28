@@ -58,4 +58,5 @@ ARCHIVER     = ar
 ARFLAGS      = r
 RANLIB       = echo
 #
+WITH_XILINX = true
 # ----------------------------------------------------------------------
