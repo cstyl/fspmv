@@ -19,26 +19,40 @@ LIBS     =
 #
 # - Compile time options -----------------------------------------------
 #
-# -DFSPMV_ALIGNED_ALLOCATOR	        Define to enable aligned allocator to be used in std::vector containers
+# -DFSPMV_ENABLE_XILINX	        Enables Xilinx Toolchain
 #
 # By default FSPMV will:
-#    *) Build with Aligned allocator disabled.
+#    *) Build with Xilinx Toolchain off.
 #
-OPTS     = 
+OPTS     = -DFSPMV_ENABLE_XILINX 
 #
 # ----------------------------------------------------------------------
 #
 DEFS     = $(OPTS) $(INCLUDES)
 #
+# - Xilinx Paths
+XILINX_VITIS   = /opt/Xilinx/Vitis/2021.1
+XILINX_XRT     = /opt/xilinx/xrt
+XILINX_VIVADO  = /opt/Xilinx/Vivado/2021.1
+#
+# - Configuration files
+#DESING_CFG     = --config $(SRCdir)/fpga/design.cfg
+#LINK_CFG       = --config $(SRCdir)/fpga/link.cfg
 # ----------------------------------------------------------------------
 # - Compilers / linkers - Optimization flags ---------------------------
 # ----------------------------------------------------------------------
 #
 CXX          = /usr/bin/g++
-CXXFLAGS     = $(DEFS) -O0 -g -std=c++11 -fsanitize=bounds-strict
+CXXFLAGS     = $(DEFS) -fomit-frame-pointer -O3 -funroll-loops -W -Wall -pedantic -std=c++11
 #
 LINKER       = $(CXX)
 LINKFLAGS    = $(CXXFLAGS)
+#
+VXX          = $(XILINX_VITIS)/bin/v++
+VXXFLAGS     = $(DESIGN_CFG) --save-temps -O3
+#
+VLINKER      = $(VXX)
+VLINKFLAGS   = $(LINK_CFG) -O3
 #
 ARCHIVER     = ar
 ARFLAGS      = r

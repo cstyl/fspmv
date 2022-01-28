@@ -12,40 +12,31 @@ RM           = /bin/rm -f
 TOUCH        = touch
 #
 # ----------------------------------------------------------------------
-# - fspmv Directory Structure / fspmv library ------------------------------
-# ----------------------------------------------------------------------
-#
-TOPdir       = .
-SRCdir       = $(TOPdir)/src
-INCdir       = $(TOPdir)/src
-BINdir       = $(TOPdir)/bin
-#
-# ----------------------------------------------------------------------
 # - fspmv includes / libraries / specifics -------------------------------
 # ----------------------------------------------------------------------
 #
-fspmv_INCLUDES = -I$(INCdir)
-fspmv_LIBS     =
+INCLUDES = 
+LIBS     =
 #
 # - Compile time options -----------------------------------------------
 #
-# -DFSPMV_ALIGNED_ALLOCATOR	        Define to enable aligned allocator to be used in std::vector containers
+# -DFSPMV_ENABLE_XILINX	        Enables Xilinx Toolchain
 #
 # By default FSPMV will:
-#    *) Build with Aligned allocator disabled.
+#    *) Build with Xilinx Toolchain off.
 #
-fspmv_OPTS     = 
+OPTS     = 
 #
 # ----------------------------------------------------------------------
 #
-fspmv_DEFS     = $(fspmv_OPTS) $(fspmv_INCLUDES)
+DEFS     = $(OPTS) $(INCLUDES)
 #
 # ----------------------------------------------------------------------
 # - Compilers / linkers - Optimization flags ---------------------------
 # ----------------------------------------------------------------------
 #
 CXX          = /usr/bin/g++
-CXXFLAGS     = $(fspmv_DEFS) -fomit-frame-pointer -O3 -funroll-loops -W -Wall -pedantic -std=c++11
+CXXFLAGS     = $(DEFS) -fomit-frame-pointer -O3 -funroll-loops -W -Wall -pedantic -std=c++11
 #
 LINKER       = $(CXX)
 LINKFLAGS    = $(CXXFLAGS)
