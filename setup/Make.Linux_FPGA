@@ -19,12 +19,12 @@ LIBS     =
 #
 # - Compile time options -----------------------------------------------
 #
-# -DFSPMV_ENABLE_XILINX	        Enables Xilinx Toolchain
+# -DFSPMV_WITH_XILINX	        Enables Xilinx Toolchain
 #
 # By default FSPMV will:
 #    *) Build with Xilinx Toolchain off.
 #
-OPTS     = -DFSPMV_ENABLE_XILINX 
+OPTS     = -DFSPMV_WITH_XILINX 
 #
 # ----------------------------------------------------------------------
 #

@@ -43,13 +43,20 @@ ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -DHW_EMU_TEST
 endif #($(TARGET), hw_emu)
 
-CXXFLAGS += -I$(SRCdir)/xilinx/xcl -I$(XILINX_XRT)/include/ -I$(XILINX_VIVADO)/include/ -I$(XILINX_HLS)/include/
-LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL
-
 DEVICE_SRCdir  = $(SRCdir)/fpga
-DEVICE_OBJECTS = fspmv_ComputeSPMV_FPGA.xo
-OBJECTS				 = xilinx/xcl/xcl.o
+KERNEL_SRCdir  = $(DEVICE_SRCdir)/kernels
+
+SOURCES				 = $(wildcard $(DEVICE_SRCdir)/*.cpp)
+SOURCES				+= $(wildcard $(SRCdir)/xilinx/xcl/*.cpp)
+KERNEL_SOURCES = $(wildcard $(KERNEL_SRCdir)/*.cpp)
+
+OBJECTS				 = $(SOURCES:$(DEVICE_SRCdir)/%.cpp=%.o)
+OBJECTS				+= $(SOURCES:$(SRCdir)/xilinx/xcl/%.cpp=%.o)
+KERNEL_OBJECTS = $(KERNEL_SOURCES:$(KERNEL_SRCdir)/%.cpp=%.xo)
 XCLBIN 			   = fspmv.$(TARGET).xclbin
+
+CXXFLAGS += -I$(DEVICE_SRCdir) -I$(SRCdir)/xilinx/xcl -I$(XILINX_XRT)/include/ -I$(XILINX_VIVADO)/include/ -I$(XILINX_HLS)/include/
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL
 endif #($(WITH_XILINX), true)
 
 # Look for headers in here
@@ -57,9 +64,8 @@ VPATH = src
 
 #Include Libraries
 LDFLAGS += -lstdc++ 
-OBJECTS  += fspmv_ComputeSPMV.o \
-						fspmv_Convert.o \
-	 					fspmv_MatrixMarket.o
+SOURCES += $(wildcard $(SRCdir)/*.cpp)
+OBJECTS += $(SOURCES:$(SRCdir)/%.cpp=%.o)
 
 build: $(XCLBIN) $(EXE) emconfig
 
@@ -73,30 +79,33 @@ endif
 
 .PHONY: clean
 clean:
-	rm -rf build bin/fspmv build_$(TARGET)
+	rm -rf build bin/fspmv 
+ifeq ($(WITH_XILINX),true)
+	rm -rf build_$(TARGET)
+endif
 
 .PHONY: device
 .ONESHELL:
-device: mkrefdir $(DEVICE_OBJECTS) $(XCLBIN)
+device: mkrefdir $(KERNEL_OBJECTS) $(XCLBIN)
 	  cp build_$(TARGET)/$(XCLBIN) bin/.
 
 #
 # Host Rules
 #
-host: mkrefdir main.o $(OBJECTS)
-	cd build; $(LINKER) $(LINKFLAGS) main.o $(OBJECTS) $(LIBS) -o $(FSPMV_PATH)/bin/xfspmv $(LDFLAGS)
+host: mkrefdir $(OBJECTS)
+	cd build; $(LINKER) $(LINKFLAGS) $(OBJECTS) $(LIBS) -o $(FSPMV_PATH)/bin/xfspmv $(LDFLAGS)
 
-%.o: $(SRCdir)/%.cpp
+%.o: $(SRCdir)/%.cpp 
 	cd build; $(CXX) -c $(CXXFLAGS) -I$(SRCdir) $< -o $@
 
 #
 # Kernel Rules
 #
-$(XCLBIN): $(DEVICE_OBJECTS)
+$(XCLBIN): $(KERNEL_OBJECTS)
 	cd build_$(TARGET); $(VLINKER) $(VLINKFLAGS) --link -o $@
 
 .PHONY: $(DEVICE_OBJECTS)
-$(DEVICE_OBJECTS): %.xo : $(DEVICE_SRCdir)/%.cpp
+$(KERNEL_OBJECTS): %.xo : $(KERNEL_SRCdir)/%.cpp
 	cd build_$(TARGET); $(VXX) $(VXXFLAGS) --compile -Isrc/fpga $< -o $@
 
 .PHONY: emconfig
